@@ -6,48 +6,8 @@
     <home-swiper :cbanners="banners"></home-swiper>
     <recommend-view :recommends="recommends"></recommend-view>
     <Feature></Feature>
-    <tab-control :titles="['a','b','c']" class="tab-control"></tab-control>
-    <ul>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-      <li></li>
-    </ul>
+    <tab-control :titles="['流行','新款','精选']" @tabClick="tabClick"></tab-control>
+    <good-list :goods="showGoods"></good-list>
   </div>
 </template>
 
@@ -57,8 +17,10 @@
   import RecommendView from "@/views/home/childComps/RecommendView";
   import Feature from "@/views/home/childComps/Feature";
   import TabControl from "@/components/content/tabControl/tabControl";
+  import GoodList from "@/components/content/goods/GoodsList";
 
   import {getHomeMultidata,getHomeGoods} from "@/network/home";
+
 
 
 
@@ -66,6 +28,7 @@
   export default {
     name: "Home",
     components:{
+      GoodList,
       TabControl,
       Feature,
       RecommendView,
@@ -78,28 +41,59 @@
         recommends: [],
         goods: {
           'pop': {page: 0,list: []},
-          'news': {page: 0,list: []},
+          'new': {page: 0,list: []},
           'sell': {page: 0,list: []}
-        }
+        },
+        currentType: 'pop'
       }
     },
     computed: {
-
+      showGoods(){
+        return this.goods[this.currentType].list
+      }
     },
     created() {
       // 1. 请求多个数据
-      getHomeMultidata().then(data => {
-        console.log(data);
-        this.banners = data.data.banner.list;
-        this.recommends = data.data.recommend.list;
-      })
+
+     this.getHomeMultidata();
 
       // 2. 求情商品数据
-      getHomeGoods('pop',1).then(res => {
-        console.log(res);
-      })
+      this.getHomeGoods('pop');
+      this.getHomeGoods('sell');
+      this.getHomeGoods('new');
     },
-    methods: {}
+    methods: {
+      /* 事件监听方法 */
+      tabClick(index){
+        console.log(index);
+        switch (index) {
+          case 0:
+            this.currentType = 'pop'
+            break;
+          case 1:
+            this.currentType = 'new'
+            break;
+          case 2:
+            this.currentType = 'sell'
+        }
+      },
+      /* 网络请求方法 */
+      getHomeMultidata(){
+        getHomeMultidata().then(data => {
+          console.log(data);
+          this.banners = data.data.banner.list;
+          this.recommends = data.data.recommend.list;
+        })
+      },
+      getHomeGoods(type){
+        const page = this.goods[type].page + 1;
+        getHomeGoods(type,page).then(res => {
+          console.log(res);
+          this.goods[type].list.push(...res.data.list);
+          this.goods[type].page += 1;
+        })
+      }
+    }
 }
 </script>
 
@@ -116,14 +110,8 @@
     position: fixed;
     left: 0;
     top: 0;
+    right: 0;
     z-index: 9;
   }
 
-  .tab-control{
-
-    position: sticky;
-    position: -webkit-sticky;
-    top:44px;
-    z-index: 99;
-  }
 </style>
