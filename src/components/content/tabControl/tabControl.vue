@@ -39,8 +39,8 @@
     display: flex;
     text-align: center;
     font-size: 15px;
-    position: sticky;
-    top:44px;
+    /*position: sticky;*/
+    /*top:44px;*/
     z-index: 9;
     background: #fff;
     padding: 10px 0;
