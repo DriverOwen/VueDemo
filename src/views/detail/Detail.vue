@@ -5,30 +5,44 @@
       <detail-swiper :top-images="topImages"></detail-swiper>
       <detail-base-info :goods="goods"></detail-base-info>
       <detail-shop-info :shop="shop"></detail-shop-info>
+      <detail-images-info :images-info="detailInfo"></detail-images-info>
+      <detail-params-info :param-info="paramsInfo"></detail-params-info>
+      <detail-comment-info :comment-info="commentInfo"></detail-comment-info>
+      <good-list :goods="recommends"></good-list>
     </scroll>
   </div>
 </template>
 
 <script>
   import DetailNavBar from "@/views/detail/childComps/DetailNavBar";
-  import {getDetail,Goods,Shop} from "@/network/detail";
+  import {getDetail,Goods,Shop,GoodsParams,getRecommend} from "@/network/detail";
   import DetailSwiper from "@/views/detail/childComps/DetailSwiper";
   import DetailBaseInfo from "@/views/detail/childComps/DetailBaseInfo";
   import DetailShopInfo from "@/views/detail/childComps/DetailShopInfo";
 
 
   import Scroll from "@/components/common/scroll/Scroll";
+  import DetailImagesInfo from "@/views/detail/childComps/DetailImagesInfo";
+  import DetailParamsInfo from "@/views/detail/childComps/DetailParamsInfo";
+  import DetailCommentInfo from "@/views/detail/childComps/DetailCommentInfo";
+  import GoodList from "@/components/content/goods/GoodsList";
 
   export default {
     name: "Detail",
-    components: {Scroll, DetailShopInfo, DetailBaseInfo, DetailSwiper, DetailNavBar},
+    components: {
+      GoodList,
+      DetailCommentInfo,
+      DetailParamsInfo, DetailImagesInfo, Scroll, DetailShopInfo, DetailBaseInfo, DetailSwiper, DetailNavBar},
     data(){
       return {
         iid: null,
         topImages: [],
         goods: {},
         shop: {},
-        detailInfo: {}
+        detailInfo: {},
+        paramsInfo: {},
+        commentInfo: {},
+        recommends: null
       }
     },
     created(){
@@ -43,6 +57,15 @@
         this.shop = new Shop(data.shopInfo)
 
         this.detailInfo = data.detailInfo
+
+        this.paramsInfo = new GoodsParams(data.itemParams.info, data.itemParams.rule || {});
+
+        if(data.rate.cRate !== 0){
+          this.commentInfo = data.rate.list[0];
+        }
+      })
+      getRecommend().then(res => {
+        this.recommends = res.data.list;
       })
     },
     // beforeRouteEnter(to,from,next){

@@ -55,7 +55,8 @@
         currentType: 'pop',
         isShowBacktop: false,
         tabOffsetTop: 0,
-        isTabFixed: false
+        isTabFixed: false,
+        itemImgListener: null
       }
     },
     computed: {
@@ -72,8 +73,6 @@
       this.getHomeGoods('pop');
       this.getHomeGoods('sell');
       this.getHomeGoods('new');
-
-
 
     },
     methods: {
@@ -131,11 +130,15 @@
     mounted(){
       const refresh = debounce(this.$refs.scroll.refresh,500);
       /* 监听item中图片加载完成 */
-      this.$bus.$on("itemImageLoad",()=> {
+      this.itemImgListener = ()=> {
         // this.$refs.scroll.refresh();
         refresh();
-
-      })
+      }
+      this.$bus.$on("itemImageLoad",this.itemImgListener)
+    },
+    deactivated(){
+      /* 取消全局监听 */
+      this.$bus.$off('itemImageLoad',this.itemImgListener)
     }
 }
 </script>
