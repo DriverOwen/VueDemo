@@ -42,6 +42,7 @@
         if (++this.count === this.imagesLength) {
           this.$emit("imgLoad");
         }
+
       }
     },
     watch: {

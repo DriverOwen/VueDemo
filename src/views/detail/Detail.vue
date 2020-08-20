@@ -1,15 +1,19 @@
 <template>
   <div id="detail">
-    <detail-nav-bar class="detailNav"></detail-nav-bar>
-    <scroll class="detailContent">
+    <detail-nav-bar ref="nav" @titleClick="titleClick" class="detailNav"></detail-nav-bar>
+    <div>
+      {{this.$store.state.cartList.length}}
+    </div>
+    <scroll ref="scroll" :probe-type="3" class="detailContent" @scroll="contentScroll">
       <detail-swiper :top-images="topImages"></detail-swiper>
       <detail-base-info :goods="goods"></detail-base-info>
       <detail-shop-info :shop="shop"></detail-shop-info>
-      <detail-images-info :images-info="detailInfo"></detail-images-info>
-      <detail-params-info :param-info="paramsInfo"></detail-params-info>
-      <detail-comment-info :comment-info="commentInfo"></detail-comment-info>
-      <good-list :goods="recommends"></good-list>
+      <detail-images-info @imgLoad="imgLoad" :images-info="detailInfo"></detail-images-info>
+      <detail-params-info ref="params" :param-info="paramsInfo"></detail-params-info>
+      <detail-comment-info ref="comment" :comment-info="commentInfo"></detail-comment-info>
+      <good-list ref="recommend" :goods="recommends"></good-list>
     </scroll>
+    <MainBottomBar @addToCar="addToCar"></MainBottomBar>
   </div>
 </template>
 
@@ -26,10 +30,13 @@
   import DetailParamsInfo from "@/views/detail/childComps/DetailParamsInfo";
   import DetailCommentInfo from "@/views/detail/childComps/DetailCommentInfo";
   import GoodList from "@/components/content/goods/GoodsList";
+  import MainBottomBar from "@/components/content/bottomBar/MainBottomBar";
+  import {debounce} from "@/common/utils";
 
   export default {
     name: "Detail",
     components: {
+      MainBottomBar,
       GoodList,
       DetailCommentInfo,
       DetailParamsInfo, DetailImagesInfo, Scroll, DetailShopInfo, DetailBaseInfo, DetailSwiper, DetailNavBar},
@@ -42,7 +49,10 @@
         detailInfo: {},
         paramsInfo: {},
         commentInfo: {},
-        recommends: null
+        recommends: null,
+        themeTopYs: [],
+        getThemeTopY: null,
+        currentIndex: 0
       }
     },
     created(){
@@ -63,11 +73,67 @@
         if(data.rate.cRate !== 0){
           this.commentInfo = data.rate.list[0];
         }
+
+        /* 当上面数据请求完毕后，再回调获取offsetTop */
+        /* dom已经加载完，但是图片还没有加载完，导致值有问题 */
+        // this.$nextTick(()=>{
+        //   this.themeTopYs = []
+        //   this.themeTopYs.push(0)
+        //   this.themeTopYs.push(this.$refs.params.$el.offsetTop)
+        //   this.themeTopYs.push(this.$refs.comment.$el.offsetTop)
+        //   this.themeTopYs.push(this.$refs.recommend.$el.offsetTop)
+        //
+        // })
+
+        /* 使用防抖，在图片加载完后再来获取值 */
+        this.getThemeTopY = debounce(()=>{
+          this.themeTopYs = []
+          this.themeTopYs.push(0)
+          this.themeTopYs.push(this.$refs.params.$el.offsetTop)
+          this.themeTopYs.push(this.$refs.comment.$el.offsetTop)
+          this.themeTopYs.push(this.$refs.recommend.$el.offsetTop)
+          console.log(this.themeTopYs)
+        },200)
       })
       getRecommend().then(res => {
         this.recommends = res.data.list;
       })
     },
+    methods: {
+      titleClick(index){
+        // console.log('接受了点击事件');
+        this.$refs.scroll.gotoScroll(0,-this.themeTopYs[index],300)
+      },
+      imgLoad(){
+        console.log('--');
+        this.$refs.scroll.refresh()
+        this.getThemeTopY()
+      },
+      contentScroll(position){
+        // console.log(position);
+        const positionY = -position.y
+        let length = this.themeTopYs.length
+        for (let i = 0; i < length;i ++){
+          if((this.currentIndex !== i) && (i < length -1 && positionY > this.themeTopYs[i] &&positionY < this.themeTopYs[i+1])||
+            (i === length - 1  && positionY > this.themeTopYs[i])){
+            this.currentIndex = i;
+            this.$refs.nav.currentIndex = i;
+          }
+        }
+      },
+      addToCar(){
+        // console.log("接受到了addCar");
+        const product = {}
+        product.image = this.topImages[0]
+        product.title = this.goods.title
+        product.desc = this.goods.desc
+        product.price = this.goods.realPrice
+        product.iid = this.iid
+        /* 添加到购物车 */
+        // this.$store.commit("addCart", product)
+        this.$store.dispatch("addCart",product)
+      }
+    }
     // beforeRouteEnter(to,from,next){
     //   console.log(this.$refs.maintabbar);
     //   next()
