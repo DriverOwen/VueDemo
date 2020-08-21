@@ -1,27 +1,39 @@
 <template>
   <div class="cart">
+    <!-- 导航 -->
     <nav-bar class="nav-bar">
-      <div slot="center">购物车({{getCartlength}})</div>
+      <div slot="center">
+        购物车(
+        <span>{{ cartLength }}</span>
+        )
+      </div>
     </nav-bar>
+    <!-- 购物车列表 -->
+    <cart-list />
   </div>
 </template>
 
 <script>
   import NavBar from "@/components/common/navbar/NavBar";
+  import CartList from "./childComps/CartList";
+  import { mapGetters } from "vuex";
+
   export default {
     name: "Cart",
-    components: {NavBar},
     computed: {
-      getCartlength(){
-        return this.$store.getters.getCartlength
-      }
-    }
-  }
+      // 对象写法可以自己命名
+      ...mapGetters({
+        cartLength: "getCartlength"
+      })
+    },
+    components: { CartList, NavBar }
+  };
 </script>
 
 <style scoped>
   .nav-bar {
-    background: #ff8198;
-    color: #fff;
+    font-weight: 600;
+    color: white;
+    background-color: #ff8198;
   }
 </style>

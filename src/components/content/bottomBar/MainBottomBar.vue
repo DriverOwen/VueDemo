@@ -1,7 +1,7 @@
 <template>
   <bottom-bar class="MainBottomBar">
     <div slot="left" class="left">
-      未开发
+
     </div>
     <div slot="right" class="right">
       <div class="addCard" @click="addToCar">

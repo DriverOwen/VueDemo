@@ -8,7 +8,7 @@ export default {
         resolve("商品加一")
       }else{
         context.commit("addToCart",payload)
-        resolve("添加购物车")
+        resolve("添加至购物车")
       }
     })
   }
