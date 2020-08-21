@@ -1,9 +1,6 @@
 <template>
   <div id="detail">
     <detail-nav-bar ref="nav" @titleClick="titleClick" class="detailNav"></detail-nav-bar>
-    <div>
-      {{this.$store.state.cartList.length}}
-    </div>
     <scroll ref="scroll" :probe-type="3" class="detailContent" @scroll="contentScroll">
       <detail-swiper :top-images="topImages"></detail-swiper>
       <detail-base-info :goods="goods"></detail-base-info>
@@ -132,6 +129,9 @@
         /* 添加到购物车 */
         // this.$store.commit("addCart", product)
         this.$store.dispatch("addCart",product)
+        .then(res => {
+          this.$toast.show(res,1500)
+        })
       }
     }
     // beforeRouteEnter(to,from,next){

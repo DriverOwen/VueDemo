@@ -1,15 +1,27 @@
 <template>
-    <div>
-      <h2>购物车</h2>
-    </div>
+  <div class="cart">
+    <nav-bar class="nav-bar">
+      <div slot="center">购物车({{getCartlength}})</div>
+    </nav-bar>
+  </div>
 </template>
 
 <script>
-    export default {
-        name: "Cart"
+  import NavBar from "@/components/common/navbar/NavBar";
+  export default {
+    name: "Cart",
+    components: {NavBar},
+    computed: {
+      getCartlength(){
+        return this.$store.getters.getCartlength
+      }
     }
+  }
 </script>
 
 <style scoped>
-
+  .nav-bar {
+    background: #ff8198;
+    color: #fff;
+  }
 </style>
